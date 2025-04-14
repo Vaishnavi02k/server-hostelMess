@@ -15,45 +15,43 @@ app.get("/", (req, res) => {
 });
 
 app.post("/payment", async (req, res) => {
-    const { amount, customerEmail } = req.body; // Expecting amount and customerEmail from frontend
-
-    // Create product in Stripe
-    const product = await stripe.products.create({
-        name: "test bill"
-    });
-
-    if (product) {
-        // Create price for the product
-        const price = await stripe.prices.create({
-            product: product.id,
-            unit_amount: amount * 100, // amount should be in paise (e.g., ₹100 = 10000 paise)
-            currency: 'inr',
-        });
-
-        if (price.id) {
-            // Create the session for Stripe Checkout
-            const session = await stripe.checkout.sessions.create({
-                line_items: [
-                    {
-                        price: price.id,
-                        quantity: 1,
-                    }
-                ],
-                mode: 'payment',
-                success_url: "https://student-mess-portal.vercel.app/success",
-                cancel_url: "https://student-mess-portal.vercel.app/cancel",
-                customer_email: customerEmail || 'vaishnavi02kalhapure@gmail.com'  // Fallback to demo email
-            });
-
-            // Send the session URL to the frontend
-            res.json({ session });
-        } else {
-            res.status(500).send("Error creating price.");
-        }
-    } else {
-        res.status(500).send("Error creating product.");
+    const { amount, customerEmail, regNo } = req.body;
+  
+    if (!regNo) {
+      return res.status(400).json({ error: "regNo is required" });
     }
-});
+  
+    try {
+      const product = await stripe.products.create({
+        name: "Mess Bill",
+      });
+  
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: amount * 100,
+        currency: "inr",
+      });
+  
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price: price.id,
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `https://student-mess-portal.vercel.app/${regNo}/success`,
+        cancel_url: `https://student-mess-portal.vercel.app/${regNo}/cancel`,
+        customer_email: customerEmail,
+      });
+  
+      res.json({ session });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Payment session creation failed.");
+    }
+  });
+  
 
 // Success and Cancel pages
 app.get("/success", (req, res) => {
