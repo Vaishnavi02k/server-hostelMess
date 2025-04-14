@@ -64,6 +64,6 @@ app.get("/cancel", (req, res) => {
     res.send("Payment Canceled.");
 });
 
-app.listen(port, () => {
+app.listen(`https://server-hostel-mess.vercel.app/` || port, () => {
     console.log(`Listening on ${port}`);
 });
