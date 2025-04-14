@@ -40,8 +40,8 @@ app.post("/payment", async (req, res) => {
                     }
                 ],
                 mode: 'payment',
-                success_url: "http://localhost:3000/success",
-                cancel_url: "http://localhost:3000/cancel",
+                success_url: "https://student-mess-portal.vercel.app/success",
+                cancel_url: "https://student-mess-portal.vercel.app/cancel",
                 customer_email: customerEmail || 'vaishnavi02kalhapure@gmail.com'  // Fallback to demo email
             });
 
